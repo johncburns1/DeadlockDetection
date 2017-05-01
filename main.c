@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "deadlock.h"
 
-//define rag
+//define rag as num processes + num locks
 int rag[NLOCK + NPROC][NLOCK + NPROC];
 
 int main(int argc, char *argv[])
@@ -13,14 +13,16 @@ int main(int argc, char *argv[])
 	ssize_t read;			//hold read data
 	int i,j = 0;
 
-	Entry **entries = malloc(8 * sizeof(Entry *));
-	for(i = 0; i < 8; i++)
+	//array of Entry pointers
+	Entry **entries = malloc(SIZE * sizeof(Entry *));
+	
+	for(i = 0; i < SIZE; i++)
 	{
 		entries[i] = malloc(sizeof(Entry *));
 	}	
 
-	//open file reader
-	fp = fopen(argv[1], "r");	//read the input file
+	//open file reader and read the given file
+	fp = fopen(argv[1], "r");
 	
 	//check for errors
 	if(fp == NULL)
@@ -32,6 +34,7 @@ int main(int argc, char *argv[])
 	//while there is still stuff to read
 	while((read = getline(&line, &length, fp)) != -1)
 	{
+		//set the entires for each request line
 		entries[j]->pid = atoi(&line[0]);
 		entries[j]->req = line[2];
 		entries[j]->lockid = atoi(&line[4]);		
@@ -46,8 +49,22 @@ int main(int argc, char *argv[])
 		free(line);
 	}
 
-	initializeRAG();
+	//initialize the matrix to all zeros
+	initializeRAG(entries);
+
+	//print the matrix
 	rag_print();
 
+	//check for cycles
+	deadlock_detect();
+	
+	//free up each memory entry
+	for(i = 0; i < SIZE; i++)
+	{
+		free(entries[i]);
+	}
+
+	//free up the entire array
+	free(entries);
 	return 0;	
 }
