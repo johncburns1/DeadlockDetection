@@ -1,6 +1,6 @@
 #define NLOCK 4			//maximum number of locks
 #define NPROC 4			//maximum number of processes
-#define SIZE 12			//size for num entries
+#define SIZE 16			//size for num entries
 
 //TODO - add an "extern" declaration for the RAG
 extern int rag[NLOCK + NPROC][NLOCK + NPROC];

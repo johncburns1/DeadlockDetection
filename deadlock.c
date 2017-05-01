@@ -179,6 +179,7 @@ int isCycle(int vertex_index, int *visited, int *stack)
 	int n = NPROC + NLOCK;
 	int adjacent[n];
 	int adjacent_size = 0;
+	int cont = 1;
 
 	//fill adjacent with all adjacent nodes for a given vertex 
 	for(i = 0; i < n; i++)
@@ -202,14 +203,21 @@ int isCycle(int vertex_index, int *visited, int *stack)
 		//recurse over all connected vertices
 		for(i = 0; i < adjacent_size; i++)
 		{
+			//if not yet visited and is part of a cycle
 			if(visited[adjacent[i]] == 0 && isCycle(adjacent[i], visited, stack) == 1)
 			{
-				//printf("%d ", vertex_index);
-				if
-				printf("Vertex: %d\n", vertex_index);
+				//when we have made it back to the start of the loop
+				if(vertex_index == stack[adjacent[i]])
+				{
+					printf("%d ", vertex_index);
+					continue;	
+				}
+				
+				printf("%d ", vertex_index);
 				return 1;
 			}
 
+			//absolute base case --> when we find a backedge
 			else if(stack[adjacent[i]] == 1)
 			{
 				printf("%d ", vertex_index);
