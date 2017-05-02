@@ -21,4 +21,5 @@ void rag_print();
 void deadlock_detect(void);
 void initializeRAG(Entry **entries);
 int isCycle(int index, int *visited, int *stack);
+int printAdjacent(int vertex_index, int initial, int *visited);
 

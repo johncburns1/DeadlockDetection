@@ -159,11 +159,61 @@ void deadlock_detect(void)
 	//call the helper
 	for(i = 0; i < n; i++)
 	{
-		if(isCycle(i, visited, stack) == 1)
-		{
-			printf("\n***CYCLE***\n");
-		}
+		isCycle(i, visited, stack);
 	}				
+}
+
+/**
+ * Print adjacent
+ */
+int printAdjacent(int vertex_index, int initial, int *visited)
+{
+	int i;
+	int n = NPROC + NLOCK;
+	int adjacent[n];
+	int adjacent_size = 0;
+
+	//fill adjacent with all adjacent nodes for a given vertex 
+	for(i = 0; i < n; i++)
+	{
+		//if there is an edge
+		if(rag[vertex_index][i] == 1)
+		{
+			adjacent[adjacent_size] = i;
+			adjacent_size++;
+		}
+	}
+	
+	if(visited[vertex_index] == 0)
+	{
+
+		//mark as visited
+		visited[vertex_index] = 1;
+		
+		//for each element in the adjacency list
+		for(i = 0; i < adjacent_size; i++)
+		{
+
+			//if this is the terminating node in the cycle
+			if(adjacent[i] == initial)
+			{
+				printf("TERMINATING --> Adjacent of %d = %d\n", vertex_index, adjacent[i]);
+				printf("%d ",vertex_index);
+				return 1;
+			}
+			
+			//if not terminating node, recurse
+			else if(visited[adjacent[i]] == 0 && printAdjacent(adjacent[i], initial, visited) == 1)
+			{
+				printf("NOT TERMINATING --> Adjacent of %d = %d\n", vertex_index, adjacent[i]);
+				printf("%d ",vertex_index);
+				return 1;
+			}
+		}
+	}
+	
+	visited[vertex_index] = 0;
+	return 0;
 }
 
 /**
@@ -175,11 +225,10 @@ void deadlock_detect(void)
  */
 int isCycle(int vertex_index, int *visited, int *stack)
 {
-	int i;
+	int i,j;
 	int n = NPROC + NLOCK;
 	int adjacent[n];
 	int adjacent_size = 0;
-	int cont = 1;
 
 	//fill adjacent with all adjacent nodes for a given vertex 
 	for(i = 0; i < n; i++)
@@ -205,23 +254,26 @@ int isCycle(int vertex_index, int *visited, int *stack)
 		{
 			//if not yet visited and is part of a cycle
 			if(visited[adjacent[i]] == 0 && isCycle(adjacent[i], visited, stack) == 1)
-			{
-				//when we have made it back to the start of the loop
-				if(vertex_index == stack[adjacent[i]])
-				{
-					printf("%d ", vertex_index);
-					continue;	
-				}
-				
-				printf("%d ", vertex_index);
+			{				
 				return 1;
 			}
 
 			//absolute base case --> when we find a backedge
 			else if(stack[adjacent[i]] == 1)
 			{
-				printf("%d ", vertex_index);
-				return 1;
+
+				//visited vertices for print initialiezed to all zeros
+				int visited_print[n];
+			
+				//new visited for printing
+				for(j = 0; j < n; j++)
+				{
+					visited_print[j] = 0;
+				}
+	
+				//call the recursive method to print
+				printf("DEADLOCK:\t");
+				return printAdjacent(vertex_index, vertex_index, visited_print);
 			}
 		}
 	}
